@@ -4,30 +4,41 @@ import '/src/components/data/chat-data.js';
 
 class ChatApp extends LitElement {
 
-    constructor() {
-        super();
-    }
+  constructor() {
+    super();
+    this.users = [];
+  }
 
-    static get properties() {
-        return {
-            unresolved: {
-                type: Boolean,
-                reflect: true
-            }
-        }
+  static get properties() {
+    return {
+      unresolved: {
+        type: Boolean,
+        reflect: true
+      },
+      users: {
+        type: Array
+      }
     }
+  }
 
-    firstUpdated() {
-        this.unresolved = false;
-    }
+  firstUpdated() {
+    this.unresolved = false;
+  }
 
-    render() {
-        return html `
-        <chat-data></chat-data>
+  addUser(e) {
+    this.users = e.detail;
+  }
+
+  render() {
+    return html`
+        <chat-data path="users" @child-added="${this.addUser}"></chat-data>
         <section>
             <chat-header></chat-header>
+            <ul>
+              ${this.users.map(user => html`<li>${user.name}</li>`)}
+            </ul>
         </section>
-        `;
-    }
+      `;
+  }
 }
 customElements.define('chat-app', ChatApp);
