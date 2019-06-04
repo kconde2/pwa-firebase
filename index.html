@@ -23,19 +23,19 @@
             height: 100%;
         }
 
-        chat-app[unresolved] {
+        chat-app {
             height: 48px;
             background-color: aliceblue;
             border-bottom: solid 1px #eee;
         }
 
-        chat-app[unresolved] header {
+        chat-app header {
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        chat-app[unresolved] img {
+        chat-app img {
             height: 42px;
             width: 42px;
             display: block;
@@ -45,10 +45,7 @@
 
 <body>
     <script src="./config.js"></script>
-    <chat-app unresolved>
-        <header><img src="./src/assets/images/1f680.png" alt="Logo"></header>
-    </chat-app>
-
+    <chat-app unresolved></chat-app>
     <script type="module" src="./src/components/chat-app.js"></script>
 </body>
 

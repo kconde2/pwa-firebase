@@ -8,6 +8,7 @@ class ChatData extends LitElement {
     super();
     this.path = '';
     this.data = [];
+    this._data = [];
   }
 
   static get properties() {
@@ -18,6 +19,9 @@ class ChatData extends LitElement {
       },
       data: {
         type: Array
+      },
+      _data: {
+        type: Array
       }
     }
   }
@@ -25,6 +29,7 @@ class ChatData extends LitElement {
   firstUpdated() {
     firebase.initializeApp(document.config);
     this.database = firebase.database();
+
     // this.database.ref().child(this.path).push({
     //   'name': ""
     // })
@@ -41,17 +46,18 @@ class ChatData extends LitElement {
       case 'value':
         break;
       case 'child_added':
-        this.data = [...this.data, data.val()];
-        this.dispatchEvent(new CustomEvent('child-added', { detail: this.data }))
+        this.data = [...this.data, data];
+        this._data = this.data.map(item => item.val());
+        this.dispatchEvent(new CustomEvent('child-changed', { detail: this._data }))
         break;
       case 'child_changed':
         break;
       case 'child_moved':
         break;
       case 'child_removed':
-     const index =  this.data.indexOf(data.val());
-     debugger
-        this.dispatchEvent(new CustomEvent('child-removed', { detail: data.val() }))
+        this.data = this.data.filter(item => item.key != data.key);
+        this._data = this.data.map(item => item.val());
+        this.dispatchEvent(new CustomEvent('child-changed', { detail: this._data }))
         break;
     }
   }

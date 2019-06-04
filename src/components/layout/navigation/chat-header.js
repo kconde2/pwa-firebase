@@ -1,8 +1,8 @@
 import { LitElement, html, css } from 'lit-element';
 
 class ChatHeader extends LitElement {
-    static get styles() {
-        return css`
+  static get styles() {
+    return css`
             :host {
                 height: 48px;
                 background-color: aliceblue;
@@ -21,13 +21,13 @@ class ChatHeader extends LitElement {
                 display: block;
             }
         `;
-    }
+  }
 
-    render() {
-        return html `
+  render() {
+    return html`
         <header><img src="./src/assets/images/1f680.png" alt="Logo"></header>
         `;
-    }
+  }
 
 
 }
