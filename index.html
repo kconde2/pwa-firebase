@@ -2,51 +2,63 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Firebase</title>
-    <style>
-        *,
-        *::before,
-        *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible"
+    content="ie=edge">
+  <title>Firebase</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        html,
-        body {
-            font-family: sans-serif;
-            background-color: #fff;
-            min-height: 100vh;
-            height: 100%;
-        }
+    html,
+    body {
+      font-family: sans-serif;
+      background-color: #fff;
+      min-height: 100vh;
+      height: 100%;
+    }
 
-        chat-app {
-            height: 48px;
-            background-color: aliceblue;
-            border-bottom: solid 1px #eee;
-        }
+    chat-app {
+      height: 48px;
+      background-color: aliceblue;
+      border-bottom: solid 1px #eee;
+    }
 
-        chat-app header {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    chat-app header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        chat-app img {
-            height: 42px;
-            width: 42px;
-            display: block;
-        }
-    </style>
+    chat-app img {
+      height: 42px;
+      width: 42px;
+      display: block;
+    }
+  </style>
+  <script>
+    (() => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./service-worker.js', { scope: '/' }).then(req => {
+          console.log('Registration successful');
+        }).catch(console.log);
+      }
+    })();
+  </script>
 </head>
 
 <body>
-    <script src="./config.js"></script>
-    <chat-app unresolved></chat-app>
-    <script type="module" src="./src/components/chat-app.js"></script>
+  <script src="./config.js"></script>
+  <chat-app unresolved></chat-app>
+  <script type="module"
+    src="./src/components/chat-app.js"></script>
 </body>
 
 </html>

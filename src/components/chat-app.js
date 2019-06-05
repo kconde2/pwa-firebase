@@ -92,6 +92,58 @@ class ChatApp extends LitElement {
   firstUpdated() {
     this.unresolved = false;
     this.logged = localStorage.getItem('logged') == 'true' ? true : false;
+
+    if (Notification.permission === 'granted') {
+      navigator.serviceWorker.ready
+        .then(registration => {
+          registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: this.urlBase64ToUint8Array(document.config.publicKey)
+          }).then(async subscribtion => {
+            subscribtion.id = this.user.uid
+            await fetch('http://localhost:8085/subscribe', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(subscribtion)
+            })
+          });
+        });
+    }
+  }
+
+  urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  subscribe() {
+    if (('serviceWorker' in navigator) || ('PushManager' in window)) {
+      Notification.requestPermission()
+        .then(function (result) {
+          if (result === 'denied') {
+            console.log('Permission wasn\'t granted. Allow a retry.');
+            return;
+          }
+          if (result === 'default') {
+            console.log('The permission request was dismissed.');
+            return;
+          }
+          console.log('Notification granted', result);
+          // Do something with the granted permission.
+        });
+    }
   }
 
   addUser(e) {
@@ -138,22 +190,25 @@ class ChatApp extends LitElement {
   render() {
     return html`
       <!-- <chat-data path="messages" @child-changed="${this.addMessage}">
-      </chat-data> -->
+                        </chat-data> -->
 
-    <chat-store collection="messages" @child-changed="${this.addMessage}"></chat-store>
-    <section>
-      <!-- <chat-header></chat-header> -->
-      <!-- header -->
-      <slot name="header"></slot>
-      <!-- header -->
+      <chat-store collection="messages" @child-changed="${this.addMessage}"></chat-store>
+      <section>
+        <!-- <chat-header></chat-header> -->
+        <!-- header -->
+        <slot name="header"></slot>
+        <!-- header -->
 
-      ${
-        !this.logged ? html`
-      <chat-auth></chat-auth>
-      <chat-login @user-logged="${this.handleLogin}">
-      </chat-login>
-      `: html`
-      <h1>Hi, ${this.user.email}</h1>
+        ${
+      !this.logged ? html`
+        <chat-auth></chat-auth>
+        <chat-login @user-logged="${this.handleLogin}">
+        </chat-login>
+        `: html`
+        <h1>Hi, ${this.user.email}</h1>
+
+        <button @click="${this.subscribe}">Subscribe</button>
+
         <h1>Messages :</h1>
         <ul id="message">
           ${this.messages.map(message => html`
@@ -162,16 +217,16 @@ class ChatApp extends LitElement {
             ${message.content} - ${this.getDate(message.date)}
           </li>
           `)}
-        <ul />
-        <footer>
-          <form @submit="${this.handleMessage}">
-            <input type="text" placeholder="Send new message ..." .value="${this.message}" @input="${e => this.message = e.target.value}">
-            <button type="submit">Send</button>
-          </form>
-        </footer>
-        `
+          <ul />
+          <footer>
+            <form @submit="${this.handleMessage}">
+              <input type="text" placeholder="Send new message ..." .value="${this.message}" @input="${e => this.message = e.target.value}">
+              <button type="submit">Send</button>
+            </form>
+          </footer>
+          `
         }
-    </section>`;
+      </section>`;
   }
 }
 
