@@ -5,6 +5,7 @@ import {
 } from 'lit-element';
 import './layout/navigation/chat-header.js';
 import './data/chat-data.js';
+import './data/chat-store.js';
 import './data/chat-auth.js';
 import './data/chat-login.js';
 
@@ -39,49 +40,53 @@ class ChatApp extends LitElement {
 
   static get styles() {
     return css`
-      * {  box-sizing: border-box }
-      footer {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-      }
-      footer form {
-        display: flex;
-        justify-content: space-between;
-        background-color: #ffffff;
-        padding: 0.5rem 1rem;
-        width: 100%;
-      }
-      footer form input {
-        width: 100%;
-      }
+    * {  box-sizing: border-box }
 
-      ul {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        margin-bottom: 3em;
-      }
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
 
-      ul li {
-        display: block;
-        padding: 0.5rem 1rem;
-        margin-bottom: 1rem;
-        background-color: #cecece;
-        border-radius: 0 30px 30px 0;
-        width: 70%;
-      }
-      ul li.own {
-        align-self: flex-end;
-        text-align: right;
-        background-color: #16a7f1;
-        color: #ffffff;
-        border-radius: 30px 0 0 30px;
-      }
-    `;
+    footer form {
+      display: flex;
+      justify-content: space-between;
+      background-color: #ffffff;
+      padding: 0.5rem 1rem;
+      width: 100%;
+    }
+
+    footer form input {
+      width: 100%;
+    }
+
+    ul {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      margin-bottom: 3em;
+    }
+
+    ul li {
+      display: block;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      background-color: #cecece;
+      border-radius: 0 30px 30px 0;
+      width: 70%;
+    }
+
+    ul li.own {
+      align-self: flex-end;
+      text-align: right;
+      background-color: #16a7f1;
+      color: #ffffff;
+      border-radius: 30px 0 0 30px;
+    }
+  `;
   }
 
   firstUpdated() {
@@ -95,16 +100,21 @@ class ChatApp extends LitElement {
 
   addMessage(e) {
     this.messages = e.detail;
+    setTimeout(() => {
+      window.scrollTo(0, document.body.scrollHeight);
+    }, 0);
   }
 
   handleLogin(e) {
     this.user = e.detail.user;
+    this.logged = true;
   }
 
   handleMessage(e) {
     e.preventDefault();
-    const database = firebase.database();
-    database.ref().child('messages').push({
+    if (!this.message) return;
+    const database = firebase.firestore();
+    database.collection('messages').add({
       content: this.message,
       date: new Date().getTime(),
       user: this.user.uid,
@@ -127,40 +137,41 @@ class ChatApp extends LitElement {
 
   render() {
     return html`
-  <chat-data path="messages" @child-changed="${this.addMessage}">
-  </chat-data>
-  <section>
-    <!-- <chat-header></chat-header> -->
-    <!-- header -->
-    <slot name="header"></slot>
-    <!-- header -->
+      <!-- <chat-data path="messages" @child-changed="${this.addMessage}">
+      </chat-data> -->
 
-    ${
-   !this.logged ? html`
-    <chat-auth></chat-auth>
-    <chat-login @user-logged="${this.handleLogin}">
-    </chat-login>
-    `: html`
-    <h1>Hi, ${this.user.email}</h1>
-    `
-     }
-    <h1>Messages :</h1>
-    <ul id="message">
-      ${this.messages.map(message => html`
-      <li class="${message.user == this.user.uid ? 'own' : ''}">
-        <strong>${message.email} said :</strong>
-        ${message.content} - ${this.getDate(message.date)}
-      </li>
-      `)}
-      </>
-      <footer>
-        <form @submit="${this.handleMessage}">
-          <input type="text" placeholder="Send new message ..." .value="${this.message}" @input="${e => this.message = e.target.value}">
-          <button type="submit">Send</button>
-        </form>
-      </footer>
-  </section>
- `;
+    <chat-store collection="messages" @child-changed="${this.addMessage}"></chat-store>
+    <section>
+      <!-- <chat-header></chat-header> -->
+      <!-- header -->
+      <slot name="header"></slot>
+      <!-- header -->
+
+      ${
+        !this.logged ? html`
+      <chat-auth></chat-auth>
+      <chat-login @user-logged="${this.handleLogin}">
+      </chat-login>
+      `: html`
+      <h1>Hi, ${this.user.email}</h1>
+        <h1>Messages :</h1>
+        <ul id="message">
+          ${this.messages.map(message => html`
+          <li class="${message.user == this.user.uid ? 'own' : ''}">
+            <strong>${message.email} said :</strong>
+            ${message.content} - ${this.getDate(message.date)}
+          </li>
+          `)}
+        <ul />
+        <footer>
+          <form @submit="${this.handleMessage}">
+            <input type="text" placeholder="Send new message ..." .value="${this.message}" @input="${e => this.message = e.target.value}">
+            <button type="submit">Send</button>
+          </form>
+        </footer>
+        `
+        }
+    </section>`;
   }
 }
 
